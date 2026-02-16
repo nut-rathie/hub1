@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Summary
-permalink: /summary/
+permalink: pretty
 ---
 
 # สรุปวิดีโอ: การใช้ Git สำหรับคนที่ไม่ใช่โปรแกรมเมอร์
