@@ -1,1 +1,17 @@
-remote_theme: pages-themes/primer
+# Jekyll configuration for GitHub Pages
+title: Hub1
+description: Git Tutorial Summary
+baseurl: ""
+u: "https://github.com/nut-rathie/hub1"
+markdown: kramdown
+theme: minima
+permalink: /:slug/
+
+# Plugins for GitHub Pages
+plugins:
+  - jekyll-feed
+  - jekyll-seo-tag
+
+# Build settings
+future: false
+safe: true
