@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEC Food System — ระบบอาหาร NEC</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Noto Sans Thai',sans-serif; background:#f5f6f8; color:#1e293b; overflow:hidden; height:100vh; }
+.layout { display:flex; height:100vh; }
+
+/* LEFT PANEL */
+.left-panel { width:260px; min-width:260px; background:#fff; border-right:1px solid #e2e8f0; display:flex; flex-direction:column; overflow-y:auto; z-index:10; }
+.left-panel h2 { font-size:15px; font-weight:600; padding:16px 16px 8px; color:#334155; }
+.search-box { padding:8px 16px; }
+.search-box input { width:100%; padding:8px 10px; border:1px solid #cbd5e1; border-radius:6px; font-family:inherit; font-size:13px; outline:none; }
+.search-box input:focus { border-color:#3b82f6; box-shadow:0 0 0 2px rgba(59,130,246,.15); }
+.filter-section { padding:8px 16px; }
+.filter-section h3 { font-size:12px; font-weight:600; color:#64748b; text-transform:uppercase; letter-spacing:.5px; margin-bottom:6px; }
+.filter-item { display:flex; align-items:center; gap:6px; padding:3px 0; cursor:pointer; font-size:13px; }
+.filter-item input[type=checkbox] { accent-color:var(--clr); width:14px; height:14px; }
+.color-dot { width:10px; height:10px; border-radius:50%; display:inline-block; flex-shrink:0; }
+.filter-item label { cursor:pointer; flex:1; }
+.filter-item .count { color:#94a3b8; font-size:11px; }
+.legend-section { padding:12px 16px; border-top:1px solid #e2e8f0; }
+.legend-section h3 { font-size:12px; font-weight:600; color:#64748b; text-transform:uppercase; letter-spacing:.5px; margin-bottom:8px; }
+.legend-conn { font-size:12px; color:#475569; margin:3px 0; display:flex; align-items:center; gap:6px; }
+.legend-line { width:28px; height:0; display:inline-block; }
+.toggle-section { padding:12px 16px; border-top:1px solid #e2e8f0; }
+.toggle-btn { width:100%; padding:8px 12px; border:1px solid #3b82f6; background:#eff6ff; color:#3b82f6; border-radius:6px; font-family:inherit; font-size:13px; font-weight:500; cursor:pointer; transition:all .15s; }
+.toggle-btn:hover { background:#dbeafe; }
+.toggle-btn.active { background:#3b82f6; color:#fff; }
+.reset-btn { width:100%; padding:8px 12px; border:1px solid #e2e8f0; background:#fff; color:#64748b; border-radius:6px; font-family:inherit; font-size:13px; cursor:pointer; margin-top:6px; }
+.reset-btn:hover { background:#f8fafc; border-color:#cbd5e1; }
+
+/* MAIN GRAPH */
+.graph-container { flex:1; position:relative; background:#fafbfd; }
+.graph-container svg { width:100%; height:100%; }
+.tooltip { position:absolute; pointer-events:none; background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:10px 14px; box-shadow:0 4px 12px rgba(0,0,0,.1); font-size:12px; max-width:280px; z-index:100; opacity:0; transition:opacity .15s; }
+.tooltip.show { opacity:1; }
+.tooltip .tt-label { font-weight:600; font-size:14px; margin-bottom:4px; }
+.tooltip .tt-type { display:inline-block; padding:1px 6px; border-radius:4px; font-size:11px; font-weight:500; margin-bottom:4px; }
+.tooltip .tt-desc { color:#475569; line-height:1.4; }
+.tooltip .tt-tags { color:#94a3b8; font-size:11px; margin-top:4px; }
+.value-chain-band { pointer-events:none; }
+.value-chain-label { font-size:13px; font-weight:600; fill:#94a3b8; }
+
+/* RIGHT PANEL */
+.right-panel { width:300px; min-width:300px; background:#fff; border-left:1px solid #e2e8f0; overflow-y:auto; z-index:10; }
+.right-panel h2 { font-size:15px; font-weight:600; padding:16px 16px 4px; color:#334155; }
+.right-panel h3 { font-size:12px; font-weight:600; color:#64748b; text-transform:uppercase; letter-spacing:.5px; padding:12px 16px 6px; }
+.stat-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; padding:4px 16px 8px; }
+.stat-card { background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:10px; text-align:center; }
+.stat-val { font-size:20px; font-weight:700; color:#1e40af; }
+.stat-label { font-size:11px; color:#64748b; margin-top:2px; }
+.gap-table { width:calc(100% - 32px); margin:4px 16px 8px; border-collapse:collapse; font-size:12px; }
+.gap-table th { text-align:left; padding:6px 8px; background:#f8fafc; border-bottom:1px solid #e2e8f0; color:#64748b; font-weight:600; }
+.gap-table td { padding:6px 8px; border-bottom:1px solid #f1f5f9; }
+.gap-bar-cell { width:80px; }
+.gap-bar { height:14px; border-radius:3px; background:#3b82f6; display:inline-block; }
+.gap-bar.low { background:#f59e0b; }
+.vc-stage { padding:8px 16px; }
+.vc-stage .stage-name { font-size:13px; font-weight:600; color:#334155; margin-bottom:4px; display:flex; align-items:center; gap:6px; }
+.vc-stage .stage-dot { width:8px; height:8px; border-radius:50%; }
+.vc-stage .stage-actors { font-size:12px; color:#475569; margin-bottom:4px; line-height:1.5; }
+.vc-stage .stage-problems { font-size:11px; color:#ef4444; line-height:1.4; }
+.product-badges { padding:4px 16px 12px; display:flex; flex-wrap:wrap; gap:4px; }
+.product-badge { display:inline-block; padding:3px 8px; background:#fef3c7; color:#92400e; border-radius:12px; font-size:11px; font-weight:500; }
+.section-divider { border:none; border-top:1px solid #e2e8f0; margin:4px 16px; }
+</style>
+</head>
+<body>
+<div class="layout">
+
+<!-- LEFT PANEL -->
+<div class="left-panel">
+  <h2>NEC Food System</h2>
+  <div class="search-box">
+    <input type="text" id="searchInput" placeholder="ค้นหา... (search)">
+  </div>
+  <div class="filter-section" id="typeFilters"></div>
+  <div class="legend-section">
+    <h3>Connection Legend</h3>
+    <div class="legend-conn"><svg width="28" height="8"><line x1="0" y1="4" x2="28" y2="4" stroke="#64748b" stroke-width="2.5"/></svg> Strong</div>
+    <div class="legend-conn"><svg width="28" height="8"><line x1="0" y1="4" x2="28" y2="4" stroke="#94a3b8" stroke-width="1.5"/></svg> Medium</div>
+    <div class="legend-conn"><svg width="28" height="8"><line x1="0" y1="4" x2="28" y2="4" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="4,3"/></svg> Dashed = Support/Policy</div>
+  </div>
+  <div class="toggle-section">
+    <button class="toggle-btn" id="vcToggle">Value Chain Layer</button>
+    <button class="reset-btn" id="resetBtn">Reset View</button>
+  </div>
+</div>
+
+<!-- MAIN GRAPH -->
+<div class="graph-container" id="graphContainer">
+  <svg id="graphSvg"></svg>
+  <div class="tooltip" id="tooltip"></div>
+</div>
+
+<!-- RIGHT PANEL -->
+<div class="right-panel">
+  <h2>Strategic Summary</h2>
+  <h3>NEC Overview</h3>
+  <div class="stat-grid">
+    <div class="stat-card"><div class="stat-val">4</div><div class="stat-label">จังหวัด</div></div>
+    <div class="stat-card"><div class="stat-val">37</div><div class="stat-label">องค์กร/หน่วยงาน</div></div>
+    <div class="stat-card"><div class="stat-val">2.2M</div><div class="stat-label">พื้นที่เกษตร (ไร่)</div></div>
+    <div class="stat-card"><div class="stat-val">4.1%</div><div class="stat-label">GAP เฉลี่ย NEC</div></div>
+  </div>
+
+  <hr class="section-divider">
+  <h3>GAP Certification</h3>
+  <table class="gap-table">
+    <tr><th>จังหวัด</th><th>เกษตรกร</th><th>% GAP</th><th></th></tr>
+    <tr><td>ลำพูน</td><td>2,210</td><td>12.9%</td><td class="gap-bar-cell"><span class="gap-bar" style="width:52px"></span></td></tr>
+    <tr><td>เชียงใหม่</td><td>6,218</td><td>8.9%</td><td class="gap-bar-cell"><span class="gap-bar" style="width:36px"></span></td></tr>
+    <tr><td>เชียงราย</td><td>1,881</td><td>1.6%</td><td class="gap-bar-cell"><span class="gap-bar low" style="width:7px"></span></td></tr>
+    <tr><td>ลำปาง</td><td>1,132</td><td>1.5%</td><td class="gap-bar-cell"><span class="gap-bar low" style="width:6px"></span></td></tr>
+  </table>
+
+  <hr class="section-divider">
+  <h3>Value Chain</h3>
+  <div class="vc-stage">
+    <div class="stage-name"><span class="stage-dot" style="background:#22c55e"></span> ต้นน้ำ (Upstream)</div>
+    <div class="stage-actors">เกษตรกรรายย่อย, กลุ่มเกษตรกรแปลงใหญ่</div>
+    <div class="stage-problems">ปัญหา: การเข้าถึงวัตถุดิบ, มาตรฐาน GAP, โครงสร้างพื้นฐาน</div>
+  </div>
+  <div class="vc-stage">
+    <div class="stage-name"><span class="stage-dot" style="background:#f59e0b"></span> กลางน้ำ (Midstream)</div>
+    <div class="stage-actors">ล้ง/พ่อค้าคนกลาง, โรงงานแปรรูป, SME อาหาร, ตลาดกลาง</div>
+    <div class="stage-problems">ปัญหา: การรับรอง อย., Novel Food, ห้องแลป</div>
+  </div>
+  <div class="vc-stage">
+    <div class="stage-name"><span class="stage-dot" style="background:#ef4444"></span> ปลายน้ำ (Downstream)</div>
+    <div class="stage-actors">Modern Trade, Traditional Trade, E-commerce, โลจิสติกส์, ด่านชายแดน</div>
+    <div class="stage-problems">ปัญหา: Modern Trade barriers, ส่งออก, E-commerce</div>
+  </div>
+
+  <hr class="section-divider">
+  <h3>ผลิตภัณฑ์หลัก</h3>
+  <div class="product-badges">
+    <span class="product-badge">ลำไย</span>
+    <span class="product-badge">มะม่วง</span>
+    <span class="product-badge">กาแฟ</span>
+    <span class="product-badge">ชา</span>
+    <span class="product-badge">นมโคคุณภาพสูง</span>
+    <span class="product-badge">ข้าว</span>
+    <span class="product-badge">พืชสมุนไพร</span>
+  </div>
+</div>
+
+</div>
+
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script>
+// ── DATA ──────────────────────────────────────────────────────────
+const elements = [
+  {label:"เชียงใหม่",type:"Province",desc:"จังหวัดศูนย์กลาง NEC เน้นอุตสาหกรรมอาหารและเกษตรมูลค่าสูง",province:"เชียงใหม่",tags:"เมืองหลัก|ศูนย์กลาง",products:"ลำไย|มะม่วง|กาแฟ"},
+  {label:"ลำพูน",type:"Province",desc:"จังหวัดมีสัดส่วน GAP สูงสุดใน NEC (13%)",province:"ลำพูน",tags:"เมืองรอง|GAP สูง",products:"ลำไย|ข้าว"},
+  {label:"เชียงราย",type:"Province",desc:"พื้นที่ชายแดนมีศักยภาพการค้าระหว่างประเทศ",province:"เชียงราย",tags:"ชายแดน|การค้าระหว่างประเทศ",products:"มะม่วง|พืชสมุนไพร"},
+  {label:"ลำปาง",type:"Province",desc:"จังหวัดเชื่อมต่อภาคเหนือตอนล่าง",province:"ลำปาง",tags:"เมืองรอง|ผ่านศุนย์",products:"ชา|นมโค"},
+  {label:"กระทรวงเกษตรและสหกรณ์",type:"Government",desc:"กระทรวงหลักด้านเกษตรกรรมไทย",province:"กรุงเทพฯ",tags:"ระดับกระทรวง|นโยบาย",products:"-"},
+  {label:"กรมส่งเสริมการเกษตร (สศก.)",type:"Government",desc:"หน่วยงานหลักส่งเสริม GAP และมาตรฐานเกษตร",province:"กรุงเทพฯ",tags:"มาตรฐาน|GAP",products:"-"},
+  {label:"สำนักงานเกษตรจังหวัดเชียงใหม่",type:"Government",desc:"หน่วยงานระดับจังหวัดด้านเกษตร",province:"เชียงใหม่",tags:"ระดับจังหวัด",products:"-"},
+  {label:"สำนักงานเกษตรจังหวัดลำพูน",type:"Government",desc:"หน่วยงานระดับจังหวัดด้านเกษตร",province:"ลำพูน",tags:"ระดับจังหวัด",products:"-"},
+  {label:"สำนักงานเกษตรจังหวัดเชียงราย",type:"Government",desc:"หน่วยงานระดับจังหวัดด้านเกษตร",province:"เชียงราย",tags:"ระดับจังหวัด",products:"-"},
+  {label:"สำนักงานเกษตรจังหวัดลำปาง",type:"Government",desc:"หน่วยงานระดับจังหวัดด้านเกษตร",province:"ลำปาง",tags:"ระดับจังหวัด",products:"-"},
+  {label:"สำนักงานอุตสาหกรรมจังหวัดเชียงใหม่",type:"Government",desc:"ส่งเสริมอุตสาหกรรม SME ในพื้นที่",province:"เชียงใหม่",tags:"SME|อุตสาหกรรม",products:"-"},
+  {label:"สำนักงานพาณิชย์จังหวัดเชียงใหม่",type:"Government",desc:"ส่งเสริมการค้าและส่งออก",province:"เชียงใหม่",tags:"การค้า|ส่งออก",products:"-"},
+  {label:"สภาพัฒน์ (NESDC)",type:"Government",desc:"วางแผนพัฒนาเศรษฐกิจและสังคมแห่งชาติ",province:"กรุงเทพฯ",tags:"แผนพัฒนา|ยุทธศาสตร์",products:"-"},
+  {label:"สำนักงาน ก.อ.ว. (สอวช.)",type:"Government",desc:"สำนักงานคณะกรรมการส่งเสริมวิทยาศาสตร์และนวัตกรรม",province:"กรุงเทพฯ",tags:"วิจัย|นวัตกรรม",products:"-"},
+  {label:"สำนักงานส่งเสริมเศรษฐกิจดิจิทัล (depa)",type:"Government",desc:"ส่งเสริม Digital Transformation",province:"กรุงเทพฯ",tags:"ดิจิทัล|นวัตกรรม",products:"-"},
+  {label:"อย. (FDA Thailand)",type:"Government",desc:"กำกับดูแลความปลอดภัยอาหารและมาตรฐาน",province:"กรุงเทพฯ",tags:"มาตรฐานอาหาร|Novel Food",products:"-"},
+  {label:"มหาวิทยาลัยเชียงใหม่",type:"Education",desc:"มหาวิทยาลัยชั้นนำภาคเหนือ มี Food Innovation Center",province:"เชียงใหม่",tags:"วิจัย|นวัตกรรม|บ่มเพาะ",products:"-"},
+  {label:"มหาวิทยาลัยธรรมศาสตร์ ศูนย์ล้านนา",type:"Education",desc:"ศูนย์วิจัยและพัฒนา สาขาเกษตรกรรมยั่งยืน",province:"เชียงใหม่",tags:"วิจัย|Green",products:"-"},
+  {label:"มหาวิทยาลัยแม่โจ้",type:"Education",desc:"เกษตรกรรมและเทคโนโลยี สาขาเกษตรชั้นนำ",province:"เชียงราย",tags:"เกษตร|วิจัย",products:"-"},
+  {label:"สถาบันเทคโนโลยีพระจอมเกล้าเจ้าคุณทหารลาดกระบัง",type:"Education",desc:"วิศวกรรมและเทคโนโลยี",province:"กรุงเทพฯ",tags:"วิศวกรรม|เทคโนโลยี",products:"-"},
+  {label:"ธนาคารพาณิชย์ (KBANK/SCB/BBL)",type:"Finance",desc:"สินเชื่อและทุนสนับสนุน SMEs",province:"ทั่วไทย",tags:"สินเชื่อ|SME",products:"-"},
+  {label:"ธนาคารพัฒนาวิสาหกิจขนาดกลางและขนาดย่อม",type:"Finance",desc:"สินเชื่อเฉพาะ SMEs",province:"กรุงเทพฯ",tags:"สินเชื่อ|SME|ภาครัฐ",products:"-"},
+  {label:"กองทุนพัฒนาธุรกิจชุมชน",type:"Finance",desc:"ทุนหมุนเวียนสำหรับกลุ่มเกษตรกร",province:"กรุงเทพฯ",tags:"ทุนหมุนเวียน|ชุมชน",products:"-"},
+  {label:"กลุ่มเกษตรกรแปลงใหญ่",type:"Producer Group",desc:"สมาคมหรือกลุ่มเกษตรกรที่รวมตัวผลิตขนาดใหญ่",province:"NEC",tags:"ผู้ผลิต|Contract Farming",products:"ลำไย|มะม่วง"},
+  {label:"เกษตรกรรายย่อย",type:"Producer",desc:"เกษตรกรรายบุคคลผลิตและขายผลผลิต",province:"NEC",tags:"ผู้ผลิต|รายย่อย",products:"-"},
+  {label:"ล้ง/พ่อค้าคนกลาง",type:"Trader",desc:"รวบรวมผลผลิตจากเกษตรกร",province:"NEC",tags:"การค้า|คนกลาง",products:"-"},
+  {label:"โรงงานแปรรูปอาหาร",type:"Processor",desc:"โรงงานมาตรฐาน GMP/OE",province:"NEC",tags:"แปรรูป|GMP",products:"-"},
+  {label:"SME อาหาร",type:"Business",desc:"ธุรกิจขนาดกลางและเล็กในอุตสาหกรรมอาหาร",province:"NEC",tags:"SME|อุตสาหกรรม",products:"-"},
+  {label:"Modern Trade",type:"Retail",desc:"ซูเปอร์มาร์เก็ต ห้างสรรพสินค้า",province:"NEC",tags:"ค้าปลีก|Modern",products:"-"},
+  {label:"Traditional Trade",type:"Retail",desc:"ตลาดสด ร้านค้าปลีก",province:"NEC",tags:"ค้าปลีก|Traditional",products:"-"},
+  {label:"E-commerce Platform",type:"Retail",desc:"ช่องทางออนไลน์ Shopee Lazada",province:"NEC",tags:"ออนไลน์|ค้าปลีก",products:"-"},
+  {label:"ศูนย์บริการแรงงาน (DIP)",type:"Support",desc:"ให้บริการ SME เชิงลึก ด้าน Lean Digital",province:"NEC",tags:"SME|บริการ",products:"-"},
+  {label:"อุทยานวิทยาศาสตร์ภาคเหนือ",type:"Support",desc:"วิจัยและพัฒนาเทคโนโลยี",province:"เชียงใหม่",tags:"วิจัย|นวัตกรรม",products:"-"},
+  {label:"สถาบันวิจัยเกษตร",type:"Research",desc:"สถาบันวิจัยเฉพาะทางด้านเกษตร",province:"เชียงใหม่",tags:"วิจัย|เกษตร",products:"-"},
+  {label:"ตลาดกลางสินค้าเกษตร",type:"Market",desc:"ตลาดกลางจำหน่ายผลผลิต",province:"NEC",tags:"ตลาก|การค้า",products:"-"},
+  {label:"ศูนย์ขนส่งและโลจิสติกส์",type:"Logistics",desc:"ศูนย์กระจายสินค้า",province:"NEC",tags:"โลจิสติกส์|ขนส่ง",products:"-"},
+  {label:"ด่านชายแดน",type:"Logistics",desc:"ด่านศุลกากร แม่สาย แม่สอด",province:"ชายแดน",tags:"ชายแดน|ส่งออก",products:"-"}
+];
+
+// Alias map for connection labels that differ from element labels
+const aliasMap = {
+  "สอวช.":"สำนักงาน ก.อ.ว. (สอวช.)",
+  "อุตสาหกรรมจังหวัดเชียงใหม่":"สำนักงานอุตสาหกรรมจังหวัดเชียงใหม่",
+  "depa":"สำนักงานส่งเสริมเศรษฐกิจดิจิทัล (depa)"
+};
+function resolve(name){ return aliasMap[name]||name; }
+
+const connectionsRaw = [
+  {from:"กระทรวงเกษตรและสหกรณ์",to:"กรมส่งเสริมการเกษตร (สศก.)",type:"Oversight",label:"กำกับดูแล",desc:"หน่วยงานในสังกัด",strength:"Strong"},
+  {from:"กระทรวงเกษตรและสหกรณ์",to:"สำนักงานเกษตรจังหวัดเชียงใหม่",type:"Policy",label:"นโยบาย",desc:"ส่งต่อนโยบายสู่พื้นที่",strength:"Strong"},
+  {from:"กระทรวงเกษตรและสหกรณ์",to:"สำนักงานเกษตรจังหวัดลำพูน",type:"Policy",label:"นโยบาย",desc:"ส่งต่อนโยบายสู่พื้นที่",strength:"Strong"},
+  {from:"กระทรวงเกษตรและสหกรณ์",to:"สำนักงานเกษตรจังหวัดเชียงราย",type:"Policy",label:"นโยบาย",desc:"ส่งต่อนโยบายสู่พื้นที่",strength:"Strong"},
+  {from:"กระทรวงเกษตรและสหกรณ์",to:"สำนักงานเกษตรจังหวัดลำปาง",type:"Policy",label:"นโยบาย",desc:"ส่งต่อนโยบายสู่พื้นที่",strength:"Strong"},
+  {from:"กรมส่งเสริมการเกษตร (สศก.)",to:"กลุ่มเกษตรกรแปลงใหญ่",type:"Support",label:"ส่งเสริม GAP",desc:"ส่งเสริมมาตรฐาน GAP",strength:"Strong"},
+  {from:"กรมส่งเสริมการเกษตร (สศก.)",to:"เกษตรกรรายย่อย",type:"Support",label:"ส่งเสริม",desc:"ให้ความรู้และสนับสนุน",strength:"Medium"},
+  {from:"สำนักงานเกษตรจังหวัดเชียงใหม่",to:"เชียงใหม่",type:"Local Admin",label:"บริหารจัดการ",desc:"ดูแลพื้นที่",strength:"Strong"},
+  {from:"สำนักงานเกษตรจังหวัดลำพูน",to:"ลำพูน",type:"Local Admin",label:"บริหารจัดการ",desc:"ดูแลพื้นที่",strength:"Strong"},
+  {from:"สำนักงานเกษตรจังหวัดเชียงราย",to:"เชียงราย",type:"Local Admin",label:"บริหารจัดการ",desc:"ดูแลพื้นที่",strength:"Strong"},
+  {from:"สำนักงานเกษตรจังหวัดลำปาง",to:"ลำปาง",type:"Local Admin",label:"บริหารจัดการ",desc:"ดูแลพื้นที่",strength:"Strong"},
+  {from:"สภาพัฒน์ (NESDC)",to:"กระทรวงเกษตรและสหกรณ์",type:"Policy",label:"ประสานงาน",desc:"ประสานนโยบายระดับชาติ",strength:"Strong"},
+  {from:"สอวช.",to:"อุตสาหกรรมจังหวัดเชียงใหม่",type:"Innovation",label:"ส่งเสริม R&D",desc:"สนับสนุนนวัตกรรม",strength:"Medium"},
+  {from:"สอวช.",to:"มหาวิทยาลัยเชียงใหม่",type:"Research",label:"สนับสนุนวิจัย",desc:"ทุนวิจัยและนวัตกรรม",strength:"Strong"},
+  {from:"สอวช.",to:"อุทยานวิทยาศาสตร์ภาคเหนือ",type:"Innovation",label:"สนับสนุน",desc:"ส่งเสริม R&D",strength:"Strong"},
+  {from:"มหาวิทยาลัยเชียงใหม่",to:"อุทยานวิทยาศาสตร์ภาคเหนือ",type:"Collaboration",label:"ร่วมวิจัย",desc:"ความร่วมมือวิจัย",strength:"Strong"},
+  {from:"มหาวิทยาลัยเชียงใหม่",to:"SME อาหาร",type:"Incubation",label:"บ่มเพาะ",desc:"Incubator Spin-off",strength:"Strong"},
+  {from:"มหาวิทยาลัยเชียงใหม่",to:"โรงงานแปรรูปอาหาร",type:"Technical Support",label:"ให้ความรู้",desc:"เทคโนโลยีและวิชาการ",strength:"Medium"},
+  {from:"มหาวิทยาลัยแม่โจ้",to:"เกษตรกรรายย่อย",type:"Extension",label:"ถ่ายทอดเทคโนโลยี",desc:"ให้ความรู้เกษตรกร",strength:"Medium"},
+  {from:"มหาวิทยาลัยธรรมศาสตร์ ศูนย์ล้านนา",to:"กลุ่มเกษตรกรแปลงใหญ่",type:"Research",label:"วิจัย",desc:"เกษตรยั่งยืน",strength:"Medium"},
+  {from:"อย. (FDA Thailand)",to:"โรงงานแปรรูปอาหาร",type:"Regulation",label:"รับรองมาตรฐาน",desc:"GMP Halal",strength:"Strong"},
+  {from:"อย. (FDA Thailand)",to:"SME อาหาร",type:"Regulation",label:"กำกับดูแล",desc:"ความปลอดภัยอาหาร",strength:"Medium"},
+  {from:"อุตสาหกรรมจังหวัดเชียงใหม่",to:"SME อาหาร",type:"Support",label:"ส่งเสริม",desc:"OPOAI-C SME OTOP",strength:"Medium"},
+  {from:"อุตสาหกรรมจังหวัดเชียงใหม่",to:"โรงงานแปรรูปอาหาร",type:"Facilitation",label:"อำนวยความสะดวก",desc:"ส่งเสริมอุตสาหกรรม",strength:"Medium"},
+  {from:"ธนาคารพาณิชย์ (KBANK/SCB/BBL)",to:"SME อาหาร",type:"Finance",label:"สินเชื่อ",desc:"ให้สินเชื่อธุรกิจ",strength:"Strong"},
+  {from:"ธนาคารพัฒนาวิสาหกิจขนาดกลางและขนาดย่อม",to:"SME อาหาร",type:"Finance",label:"ทุนสนับสนุน",desc:"สินเชื่อ SME",strength:"Strong"},
+  {from:"กองทุนพัฒนาธุรกิจชุมชน",to:"กลุ่มเกษตรกรแปลงใหญ่",type:"Finance",label:"ทุนหมุนเวียน",desc:"ให้ทุนหมุนเวียน",strength:"Medium"},
+  {from:"ศูนย์บริการแรงงาน (DIP)",to:"SME อาหาร",type:"Support",label:"Lean Digital",desc:"ให้บริการเชิงลึก",strength:"Medium"},
+  {from:"เกษตรกรรายย่อย",to:"ล้ง/พ่อค้าคนกลาง",type:"Sell",label:"ขายผลผลิต",desc:"จำหน่ายผลผลิต",strength:"Strong"},
+  {from:"กลุ่มเกษตรกรแปลงใหญ่",to:"ล้ง/พ่อค้าคนกลาง",type:"Sell",label:"ขายผลผลิต",desc:"จำหน่ายผลผลิต",strength:"Strong"},
+  {from:"ล้ง/พ่อค้าคนกลาง",to:"โรงงานแปรรูปอาหาร",type:"Supply",label:"จัดหาวัตถุดิบ",desc:"จัดหาวัตถุดิบให้โรงงาน",strength:"Strong"},
+  {from:"ล้ง/พ่อค้าคนกลาง",to:"Modern Trade",type:"Distribution",label:"กระจายสินค้า",desc:"จัดจำหน่าย",strength:"Medium"},
+  {from:"ล้ง/พ่อค้าคนกลาง",to:"ตลาดกลางสินค้าเกษตร",type:"Trade",label:"ขายส่ง",desc:"จำหน่ายในตลาดกลาง",strength:"Medium"},
+  {from:"โรงงานแปรรูปอาหาร",to:"SME อาหาร",type:"Partner",label:"OEM",desc:"ผลิตให้ OEM",strength:"Medium"},
+  {from:"โรงงานแปรรูปอาหาร",to:"Modern Trade",type:"Distribution",label:"จัดจำหน่าย",desc:"ส่งเข้าห้าง",strength:"Strong"},
+  {from:"โรงงานแปรรูปอาหาร",to:"Traditional Trade",type:"Distribution",label:"จัดจำหน่าย",desc:"ส่งตลาด",strength:"Medium"},
+  {from:"โรงงานแปรรูปอาหาร",to:"E-commerce Platform",type:"Distribution",label:"ขายออนไลน์",desc:"จำหน่ายออนไลน์",strength:"Medium"},
+  {from:"SME อาหาร",to:"Modern Trade",type:"Distribution",label:"จัดจำหน่าย",desc:"ส่งเข้าห้าง",strength:"Medium"},
+  {from:"SME อาหาร",to:"Traditional Trade",type:"Distribution",label:"จัดจำหน่าย",desc:"ส่งตลาด",strength:"Medium"},
+  {from:"SME อาหาร",to:"E-commerce Platform",type:"Distribution",label:"ขายออนไลน์",desc:"จำหน่ายออนไลน์",strength:"Medium"},
+  {from:"เชียงใหม่",to:"มหาวิทยาลัยเชียงใหม่",type:"Location",label:"ตั้งอยู่",desc:"มหาวิทยาลัยชั้นนำ",strength:"Strong"},
+  {from:"เชียงใหม่",to:"อุทยานวิทยาศาสตร์ภาคเหนือ",type:"Location",label:"ตั้งอยู่",desc:"ศูนย์วิจัย",strength:"Strong"},
+  {from:"เชียงใหม่",to:"อุตสาหกรรมจังหวัดเชียงใหม่",type:"Location",label:"ตั้งอยู่",desc:"หน่วยงานรัฐ",strength:"Strong"},
+  {from:"เชียงใหม่",to:"สำนักงานพาณิชย์จังหวัดเชียงใหม่",type:"Location",label:"ตั้งอยู่",desc:"หน่วยงานรัฐ",strength:"Strong"},
+  {from:"เชียงใหม่",to:"ศูนย์บริการแรงงาน (DIP)",type:"Location",label:"ตั้งอยู่",desc:"หน่วยงานสนับสนุน",strength:"Strong"},
+  {from:"เชียงราย",to:"ด่านชายแดน",type:"Trade",label:"ส่งออก",desc:"ค้าชายแดนไทย-เมียนมา",strength:"Strong"},
+  {from:"เชียงราย",to:"มหาวิทยาลัยแม่โจ้",type:"Location",label:"ตั้งอยู่",desc:"สถาบันการศึกษา",strength:"Strong"},
+  {from:"ลำปาง",to:"ศูนย์ขนส่งและโลจิสติกส์",type:"Infrastructure",label:"ศูนย์กลางโลจิสติกส์",desc:"เชื่อมต่อภาคเหนือ",strength:"Medium"},
+  {from:"ธนาคารพาณิชย์ (KBANK/SCB/BBL)",to:"มหาวิทยาลัยเชียงใหม่",type:"CSR",label:"ความรับผิดชอบต่อสังคม",desc:"ทุนการศึกษา",strength:"Medium"},
+  {from:"depa",to:"SME อาหาร",type:"Digital",label:"ส่งเสริมดิจิทัล",desc:"ให้ความรู้ดิจิทัล",strength:"Medium"},
+  {from:"depa",to:"อุทยานวิทยาศาสตร์ภาคเหนือ",type:"Tech",label:"สนับสนุน",desc:"เทคโนโลยีดิจิทัล",strength:"Medium"}
+];
+
+// ── COLOR MAP ──────────────────────────────────────────────────
+const typeColors = {
+  "Province":"#2563eb","Government":"#7c3aed","Education":"#0d9488",
+  "Finance":"#16a34a","Producer Group":"#d97706","Producer":"#ea580c",
+  "Trader":"#dc2626","Processor":"#be185d","Business":"#4f46e5",
+  "Retail":"#8b5cf6","Support":"#0284c7","Research":"#059669",
+  "Market":"#ca8a04","Logistics":"#64748b"
+};
+
+// ── VALUE CHAIN ASSIGNMENT ─────────────────────────────────────
+const vcMap = {
+  "Producer":"Upstream","Producer Group":"Upstream",
+  "Trader":"Midstream","Processor":"Midstream","Business":"Midstream","Market":"Midstream",
+  "Retail":"Downstream","Logistics":"Downstream"
+};
+// Cross-cutting types: Province, Government, Education, Finance, Support, Research
+
+// ── BUILD GRAPH DATA ───────────────────────────────────────────
+const labelIndex = {};
+elements.forEach((e,i)=>{ labelIndex[e.label]=i; });
+
+// Resolve connections
+const connections = connectionsRaw.map(c=>({
+  ...c,
+  from: resolve(c.from),
+  to: resolve(c.to)
+})).filter(c=>{
+  const hasFrom = labelIndex[c.from] !== undefined;
+  const hasTo = labelIndex[c.to] !== undefined;
+  if(!hasFrom||!hasTo) console.warn("Missing node:",c.from,"→",c.to);
+  return hasFrom && hasTo && c.from !== c.to; // skip self-loops
+});
+
+// Count connections per node
+const connCount = {};
+elements.forEach(e=>connCount[e.label]=0);
+connections.forEach(c=>{ connCount[c.from]++; connCount[c.to]++; });
+
+// Build D3 nodes & links
+const nodes = elements.map((e,i)=>({
+  id: i,
+  label: e.label,
+  type: e.type,
+  desc: e.desc,
+  province: e.province,
+  tags: e.tags,
+  products: e.products,
+  vc: vcMap[e.type]||"Cross-cutting",
+  r: e.type==="Province" ? 28 + connCount[e.label]*1.5 : 10 + connCount[e.label]*2
+}));
+
+const links = connections.map(c=>({
+  source: labelIndex[c.from],
+  target: labelIndex[c.to],
+  type: c.type,
+  label: c.label,
+  desc: c.desc,
+  strength: c.strength
+}));
+
+// ── TYPE FILTER UI ─────────────────────────────────────────────
+const typeCounts = {};
+elements.forEach(e=>{ typeCounts[e.type]=(typeCounts[e.type]||0)+1; });
+const typeList = Object.keys(typeCounts).sort();
+const activeTypes = new Set(typeList);
+
+const filterDiv = document.getElementById("typeFilters");
+filterDiv.innerHTML = '<h3>Element Types</h3>' + typeList.map(t=>`
+  <div class="filter-item" style="--clr:${typeColors[t]}">
+    <input type="checkbox" checked data-type="${t}" id="ft_${t}">
+    <span class="color-dot" style="background:${typeColors[t]}"></span>
+    <label for="ft_${t}">${t}</label>
+    <span class="count">${typeCounts[t]}</span>
+  </div>`).join("");
+
+filterDiv.querySelectorAll("input").forEach(cb=>{
+  cb.addEventListener("change",()=>{
+    if(cb.checked) activeTypes.add(cb.dataset.type);
+    else activeTypes.delete(cb.dataset.type);
+    updateVisibility();
+  });
+});
+
+// ── SVG SETUP ──────────────────────────────────────────────────
+const container = document.getElementById("graphContainer");
+const svg = d3.select("#graphSvg");
+const width = container.clientWidth;
+const height = container.clientHeight;
+
+// Arrow marker
+svg.append("defs").selectAll("marker")
+  .data(["arrow"])
+  .join("marker")
+    .attr("id","arrow")
+    .attr("viewBox","0 -5 10 10")
+    .attr("refX",20)
+    .attr("refY",0)
+    .attr("markerWidth",6)
+    .attr("markerHeight",6)
+    .attr("orient","auto")
+  .append("path")
+    .attr("d","M0,-5L10,0L0,5")
+    .attr("fill","#94a3b8");
+
+const g = svg.append("g");
+
+// Value chain bands (hidden initially)
+const vcBands = g.append("g").attr("class","vc-bands").style("display","none");
+const bandColors = {Upstream:"rgba(34,197,94,0.06)",Midstream:"rgba(245,158,11,0.06)",Downstream:"rgba(239,68,68,0.06)","Cross-cutting":"rgba(100,116,139,0.03)"};
+const bandLabels = {Upstream:"ต้นน้ำ Upstream",Midstream:"กลางน้ำ Midstream",Downstream:"ปลายน้ำ Downstream","Cross-cutting":"Cross-cutting"};
+const bandOrder = ["Upstream","Midstream","Downstream","Cross-cutting"];
+const bandH = height/4;
+bandOrder.forEach((b,i)=>{
+  vcBands.append("rect").attr("class","value-chain-band")
+    .attr("x",-2000).attr("y",i*bandH - height/2 + 50)
+    .attr("width",6000).attr("height",bandH)
+    .attr("fill",bandColors[b]);
+  vcBands.append("text").attr("class","value-chain-label")
+    .attr("x",-width/2+80).attr("y",i*bandH - height/2 + 75)
+    .text(bandLabels[b]);
+});
+
+// Dash patterns for connection types
+function dashPattern(type){
+  const dashed = ["Policy","Oversight","Support","Regulation","Local Admin","Location","CSR","Innovation","Extension","Research","Collaboration","Incubation","Technical Support","Facilitation","Digital","Tech","Infrastructure"];
+  return dashed.includes(type) ? "6,4" : "none";
+}
+
+// Links
+const linkG = g.append("g");
+const linkEls = linkG.selectAll("line")
+  .data(links).join("line")
+  .attr("stroke",d=>d.strength==="Strong"?"#64748b":"#cbd5e1")
+  .attr("stroke-width",d=>d.strength==="Strong"?2.2:1.2)
+  .attr("stroke-dasharray",d=>dashPattern(d.type))
+  .attr("marker-end","url(#arrow)")
+  .attr("opacity",0.7);
+
+// Nodes
+const nodeG = g.append("g");
+const nodeEls = nodeG.selectAll("g")
+  .data(nodes).join("g")
+  .attr("cursor","pointer")
+  .call(d3.drag()
+    .on("start",dragStart)
+    .on("drag",dragged)
+    .on("end",dragEnd));
+
+nodeEls.append("circle")
+  .attr("r",d=>d.r)
+  .attr("fill",d=>typeColors[d.type])
+  .attr("stroke","#fff")
+  .attr("stroke-width",2)
+  .attr("opacity",0.9);
+
+// Labels
+nodeEls.append("text")
+  .text(d=>{
+    // Truncate long labels
+    const max = d.type==="Province"?20:16;
+    return d.label.length>max ? d.label.slice(0,max)+"…" : d.label;
+  })
+  .attr("dy",d=>d.r+14)
+  .attr("text-anchor","middle")
+  .attr("font-size",d=>d.type==="Province"?"12px":"10px")
+  .attr("font-weight",d=>d.type==="Province"?"600":"400")
+  .attr("fill","#334155")
+  .attr("pointer-events","none");
+
+// ── TOOLTIP ────────────────────────────────────────────────────
+const tooltip = document.getElementById("tooltip");
+
+nodeEls.on("mouseenter",function(event,d){
+  // Highlight connected
+  const connected = new Set([d.id]);
+  links.forEach(l=>{
+    const si = typeof l.source==="object"?l.source.id:l.source;
+    const ti = typeof l.target==="object"?l.target.id:l.target;
+    if(si===d.id) connected.add(ti);
+    if(ti===d.id) connected.add(si);
+  });
+  nodeEls.select("circle").attr("opacity",n=>connected.has(n.id)?1:0.15);
+  nodeEls.select("text").attr("opacity",n=>connected.has(n.id)?1:0.15);
+  linkEls.attr("opacity",l=>{
+    const si = typeof l.source==="object"?l.source.id:l.source;
+    const ti = typeof l.target==="object"?l.target.id:l.target;
+    return si===d.id||ti===d.id ? 1 : 0.05;
+  });
+  // Tooltip
+  const tags = d.tags && d.tags!=="-" ? d.tags.replace(/\|/g,", ") : "";
+  const products = d.products && d.products!=="-" ? d.products.replace(/\|/g,", ") : "";
+  tooltip.innerHTML = `
+    <div class="tt-label">${d.label}</div>
+    <span class="tt-type" style="background:${typeColors[d.type]}20;color:${typeColors[d.type]}">${d.type}</span>
+    <div class="tt-desc">${d.desc}</div>
+    ${tags?`<div class="tt-tags">Tags: ${tags}</div>`:""}
+    ${products?`<div class="tt-tags">Products: ${products}</div>`:""}
+    <div class="tt-tags">Connections: ${connCount[d.label]}</div>`;
+  tooltip.classList.add("show");
+  const rect = container.getBoundingClientRect();
+  const x = event.clientX - rect.left + 15;
+  const y = event.clientY - rect.top - 10;
+  tooltip.style.left = (x+280>rect.width ? x-295 : x) + "px";
+  tooltip.style.top = (y+tooltip.offsetHeight>rect.height ? y-tooltip.offsetHeight : y) + "px";
+})
+.on("mousemove",function(event){
+  const rect = container.getBoundingClientRect();
+  const x = event.clientX - rect.left + 15;
+  const y = event.clientY - rect.top - 10;
+  tooltip.style.left = (x+280>rect.width ? x-295 : x) + "px";
+  tooltip.style.top = (y+tooltip.offsetHeight>rect.height ? y-tooltip.offsetHeight : y) + "px";
+})
+.on("mouseleave",function(){
+  if(!focusedNode){
+    nodeEls.select("circle").attr("opacity",0.9);
+    nodeEls.select("text").attr("opacity",1);
+    linkEls.attr("opacity",0.7);
+  }
+  tooltip.classList.remove("show");
+});
+
+// ── CLICK FOCUS ────────────────────────────────────────────────
+let focusedNode = null;
+
+nodeEls.on("click",function(event,d){
+  event.stopPropagation();
+  if(focusedNode===d.id){ focusedNode=null; resetHighlight(); return; }
+  focusedNode = d.id;
+  const connected = new Set([d.id]);
+  links.forEach(l=>{
+    const si = typeof l.source==="object"?l.source.id:l.source;
+    const ti = typeof l.target==="object"?l.target.id:l.target;
+    if(si===d.id) connected.add(ti);
+    if(ti===d.id) connected.add(si);
+  });
+  nodeEls.select("circle").attr("opacity",n=>connected.has(n.id)?1:0.08);
+  nodeEls.select("text").attr("opacity",n=>connected.has(n.id)?1:0.08);
+  linkEls.attr("opacity",l=>{
+    const si = typeof l.source==="object"?l.source.id:l.source;
+    const ti = typeof l.target==="object"?l.target.id:l.target;
+    return si===d.id||ti===d.id ? 1 : 0.03;
+  });
+});
+
+svg.on("click",()=>{ focusedNode=null; resetHighlight(); });
+
+function resetHighlight(){
+  nodeEls.select("circle").attr("opacity",d=>activeTypes.has(d.type)?0.9:0);
+  nodeEls.select("text").attr("opacity",d=>activeTypes.has(d.type)?1:0);
+  linkEls.attr("opacity",0.7);
+  updateVisibility();
+}
+
+// ── SEARCH ─────────────────────────────────────────────────────
+const searchInput = document.getElementById("searchInput");
+searchInput.addEventListener("input",()=>{
+  const q = searchInput.value.trim().toLowerCase();
+  if(!q){ resetHighlight(); return; }
+  const matches = new Set();
+  nodes.forEach(n=>{
+    const hay = (n.label+"|"+n.desc+"|"+n.tags+"|"+n.type+"|"+n.products).toLowerCase();
+    if(hay.includes(q)) matches.add(n.id);
+  });
+  nodeEls.select("circle").attr("opacity",n=>matches.has(n.id)?1:0.12);
+  nodeEls.select("text").attr("opacity",n=>matches.has(n.id)?1:0.12);
+  linkEls.attr("opacity",l=>{
+    const si = typeof l.source==="object"?l.source.id:l.source;
+    const ti = typeof l.target==="object"?l.target.id:l.target;
+    return matches.has(si)&&matches.has(ti) ? 0.8 : 0.04;
+  });
+});
+
+// ── TYPE FILTER VISIBILITY ─────────────────────────────────────
+function updateVisibility(){
+  nodeEls.select("circle").attr("opacity",d=>activeTypes.has(d.type)?0.9:0);
+  nodeEls.select("text").attr("opacity",d=>activeTypes.has(d.type)?1:0);
+  nodeEls.attr("pointer-events",d=>activeTypes.has(d.type)?"all":"none");
+  linkEls.attr("opacity",l=>{
+    const si = typeof l.source==="object"?l.source.id:l.source;
+    const ti = typeof l.target==="object"?l.target.id:l.target;
+    const sn = nodes[si], tn = nodes[ti];
+    return activeTypes.has(sn.type)&&activeTypes.has(tn.type) ? 0.7 : 0;
+  });
+}
+
+// ── VALUE CHAIN TOGGLE ─────────────────────────────────────────
+let vcActive = false;
+const vcToggle = document.getElementById("vcToggle");
+vcToggle.addEventListener("click",()=>{
+  vcActive = !vcActive;
+  vcToggle.classList.toggle("active",vcActive);
+  vcBands.style("display",vcActive?"block":"none");
+  if(vcActive){
+    // Pull nodes to band positions
+    const bandY = {};
+    bandOrder.forEach((b,i)=>bandY[b] = i*bandH - height/2 + 50 + bandH/2);
+    simulation.force("vcY",d3.forceY(d=>bandY[d.vc]||0).strength(0.3));
+  } else {
+    simulation.force("vcY",null);
+  }
+  simulation.alpha(0.6).restart();
+});
+
+// ── RESET BUTTON ───────────────────────────────────────────────
+document.getElementById("resetBtn").addEventListener("click",()=>{
+  focusedNode = null;
+  searchInput.value = "";
+  // Reset all type filters
+  filterDiv.querySelectorAll("input").forEach(cb=>{ cb.checked=true; activeTypes.add(cb.dataset.type); });
+  // Reset value chain
+  if(vcActive){ vcActive=false; vcToggle.classList.remove("active"); vcBands.style("display","none"); simulation.force("vcY",null); }
+  resetHighlight();
+  // Reset zoom
+  svg.transition().duration(500).call(zoom.transform, d3.zoomIdentity);
+  simulation.alpha(0.3).restart();
+});
+
+// ── ZOOM ───────────────────────────────────────────────────────
+const zoom = d3.zoom().scaleExtent([0.3,5]).on("zoom",e=>g.attr("transform",e.transform));
+svg.call(zoom);
+svg.call(zoom.transform, d3.zoomIdentity.translate(width/2,height/2).scale(0.85));
+
+// ── SIMULATION ─────────────────────────────────────────────────
+const simulation = d3.forceSimulation(nodes)
+  .force("link",d3.forceLink(links).id(d=>d.id).distance(d=>d.strength==="Strong"?100:140).strength(0.4))
+  .force("charge",d3.forceManyBody().strength(-300))
+  .force("center",d3.forceCenter(0,0))
+  .force("collision",d3.forceCollide().radius(d=>d.r+8))
+  .on("tick",()=>{
+    linkEls
+      .attr("x1",d=>d.source.x).attr("y1",d=>d.source.y)
+      .attr("x2",d=>d.target.x).attr("y2",d=>d.target.y);
+    nodeEls.attr("transform",d=>`translate(${d.x},${d.y})`);
+  });
+
+function dragStart(event,d){
+  if(!event.active) simulation.alphaTarget(0.3).restart();
+  d.fx=d.x; d.fy=d.y;
+}
+function dragged(event,d){ d.fx=event.x; d.fy=event.y; }
+function dragEnd(event,d){
+  if(!event.active) simulation.alphaTarget(0);
+  d.fx=null; d.fy=null;
+}
+
+// ── RESIZE ─────────────────────────────────────────────────────
+window.addEventListener("resize",()=>{
+  const w = container.clientWidth, h = container.clientHeight;
+  svg.call(zoom.transform, d3.zoomIdentity.translate(w/2,h/2).scale(0.85));
+});
+</script>
+</body>
+</html>
