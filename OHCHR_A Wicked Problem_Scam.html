@@ -1,0 +1,717 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Trafficking into Cyber Scam Operations — Behavioural Sci + Tech View</title>
+  <style>
+    :root{
+      --bg:#0b0f17;
+      --panel:#0f1626;
+      --panel2:#0c1322;
+      --text:#e7ecf5;
+      --muted:#a9b3c7;
+      --line:#24304a;
+      --accent:#7aa2ff;
+      --accent2:#5de4c7;
+      --warn:#ffd37a;
+      --danger:#ff7aa2;
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --radius:16px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font: 14px/1.45 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: radial-gradient(1200px 600px at 20% 0%, rgba(122,162,255,.18), transparent 55%),
+                  radial-gradient(1000px 500px at 80% 20%, rgba(93,228,199,.14), transparent 60%),
+                  var(--bg);
+      color:var(--text);
+    }
+    a{color:inherit}
+    .wrap{max-width:1180px;margin:0 auto;padding:22px 18px 40px}
+    header{
+      display:flex;gap:14px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;
+      margin-bottom:14px;
+    }
+    .title{
+      display:flex;gap:14px;align-items:flex-start;
+    }
+    .badge{
+      padding:6px 10px;border:1px solid var(--line);border-radius:999px;
+      color:var(--muted);background:rgba(255,255,255,.03);
+      font-size:12px;
+    }
+    h1{
+      margin:0;
+      font-size:18px;
+      letter-spacing:.2px;
+    }
+    .sub{
+      margin-top:4px;color:var(--muted);max-width:820px
+    }
+
+    /* Controls */
+    .controls{
+      display:flex;gap:10px;align-items:center;flex-wrap:wrap;
+      margin:14px 0 18px;
+      padding:12px 12px;
+      background:rgba(255,255,255,.03);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow: var(--shadow);
+    }
+    .search{
+      flex:1;min-width:240px;
+      display:flex;gap:10px;align-items:center;
+      padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:rgba(0,0,0,.18)
+    }
+    .search input{
+      width:100%;border:0;outline:0;background:transparent;color:var(--text);
+      font-size:13px;
+    }
+    .chips{display:flex;gap:8px;flex-wrap:wrap}
+    .chip{
+      user-select:none;
+      padding:8px 10px;border:1px solid var(--line);border-radius:999px;
+      background:rgba(255,255,255,.02);
+      color:var(--muted);
+      cursor:pointer;
+      font-size:12px;
+      transition: transform .08s ease, background .15s ease, border-color .15s ease;
+    }
+    .chip:hover{transform:translateY(-1px);border-color:#33446b}
+    .chip.active{
+      color:var(--text);
+      border-color:rgba(122,162,255,.7);
+      background:rgba(122,162,255,.12);
+    }
+    .btn{
+      padding:9px 12px;border:1px solid var(--line);border-radius:12px;
+      background:rgba(0,0,0,.18);
+      color:var(--text);
+      cursor:pointer;font-size:12px;
+    }
+    .btn:hover{border-color:#33446b}
+    .count{
+      margin-left:auto;color:var(--muted);font-size:12px
+    }
+
+    /* Layout */
+    .grid{
+      display:grid;
+      grid-template-columns: 380px 1fr;
+      gap:14px;
+    }
+    @media (max-width: 980px){
+      .grid{grid-template-columns:1fr}
+    }
+
+    .panel{
+      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .panel h2{
+      margin:0;font-size:13px;color:var(--muted);letter-spacing:.3px;
+      padding:12px 14px;border-bottom:1px solid var(--line);
+      background:rgba(0,0,0,.16);
+    }
+    .panel .body{padding:12px 14px}
+    .kpi{
+      display:grid;grid-template-columns:1fr 1fr;gap:10px;
+    }
+    .kpi .card{
+      padding:12px;border:1px solid var(--line);border-radius:14px;
+      background:rgba(0,0,0,.16);
+    }
+    .kpi .num{font-size:18px}
+    .kpi .lbl{color:var(--muted);font-size:12px;margin-top:2px}
+    .note{color:var(--muted);font-size:12px;margin-top:10px}
+
+    /* COM-B */
+    .comb{
+      display:grid;grid-template-columns:1fr;gap:10px;margin-top:12px
+    }
+    .comb .row{
+      border:1px solid var(--line);border-radius:14px;overflow:hidden;
+      background:rgba(0,0,0,.16);
+    }
+    .comb .head{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:10px 12px;border-bottom:1px solid var(--line);
+      background:rgba(255,255,255,.02);
+      cursor:pointer;
+    }
+    .comb .head strong{font-size:13px}
+    .pill{
+      padding:4px 8px;border-radius:999px;font-size:11px;border:1px solid var(--line);color:var(--muted)
+    }
+    .comb .content{padding:10px 12px;display:none}
+    .comb .row.open .content{display:block}
+    ul{margin:0;padding-left:18px}
+    li{margin:4px 0}
+    .insight{
+      margin-top:10px;padding:10px 12px;border-radius:14px;
+      border:1px dashed rgba(93,228,199,.55);
+      background:rgba(93,228,199,.08);
+      color:var(--text);
+      font-size:13px;
+    }
+
+    /* Main cards */
+    .cards{
+      display:grid;grid-template-columns:1fr;gap:12px;
+      padding:12px 14px;
+    }
+    .cardx{
+      border:1px solid var(--line);
+      border-radius:16px;
+      background: linear-gradient(180deg, rgba(0,0,0,.18), rgba(0,0,0,.10));
+      overflow:hidden;
+    }
+    .cardx header{
+      margin:0;
+      padding:12px 12px;
+      display:flex;align-items:flex-start;gap:10px;justify-content:space-between;
+      border-bottom:1px solid var(--line);
+      background:rgba(255,255,255,.02);
+    }
+    .cardx h3{margin:0;font-size:14px}
+    .tags{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+    .tag{
+      font-size:11px;color:var(--muted);
+      border:1px solid var(--line);border-radius:999px;
+      padding:4px 8px;background:rgba(255,255,255,.02);
+    }
+    .tag.beh{border-color:rgba(93,228,199,.45)}
+    .tag.tech{border-color:rgba(122,162,255,.55)}
+    .tag.sys{border-color:rgba(255,211,122,.55)}
+    .tag.key{border-color:rgba(255,122,162,.55)}
+    .cardx .content{padding:12px 12px}
+    .cardx details{
+      border-top:1px solid var(--line);
+      padding:10px 12px;
+      background:rgba(0,0,0,.12);
+    }
+    .cardx summary{cursor:pointer;color:var(--muted)}
+    .hidden{display:none !important}
+
+    /* Mini diagram */
+    .stack{
+      margin-top:12px;
+      display:grid;gap:8px;
+    }
+    .layer{
+      display:flex;align-items:center;gap:10px;
+      padding:10px 12px;border:1px solid var(--line);border-radius:14px;
+      background:rgba(0,0,0,.14);
+    }
+    .dot{width:10px;height:10px;border-radius:999px;background:var(--accent)}
+    .dot.beh{background:var(--accent2)}
+    .dot.sys{background:var(--warn)}
+    .dot.key{background:var(--danger)}
+    .layer span{color:var(--muted);font-size:12px}
+    .layer strong{font-size:12px}
+    footer{margin-top:14px;color:var(--muted);font-size:12px}
+    .sr{position:absolute;left:-10000px;top:auto;width:1px;height:1px;overflow:hidden;}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="title">
+        <div>
+          <div class="badge">Behavioural science + Technology synthesis</div>
+          <h1>Trafficking into Cyber Scam Operations — What Drives Recruitment</h1>
+          <div class="sub">
+            Interactive overview of key points: wickedness of the problem, COM-B behavioural drivers, trust dynamics, tech enablement (AI + platforms),
+            system-level enablers, and integrated prevention.
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="controls">
+      <label class="search" aria-label="Search">
+        <span style="color:var(--muted);font-size:12px">Search</span>
+        <input id="q" placeholder="Type to filter (e.g., trust, AI, Facebook, COM-B, corruption)..." />
+      </label>
+
+      <div class="chips" role="group" aria-label="Filters">
+        <div class="chip active" data-filter="all">All</div>
+        <div class="chip" data-filter="behavioural">Behavioural</div>
+        <div class="chip" data-filter="technology">Technology</div>
+        <div class="chip" data-filter="systems">Systems</div>
+        <div class="chip" data-filter="prevention">Prevention</div>
+      </div>
+
+      <button class="btn" id="expandAll">Expand all</button>
+      <button class="btn" id="collapseAll">Collapse all</button>
+
+      <div class="count" id="count"></div>
+    </div>
+
+    <div class="grid">
+      <!-- LEFT: Snapshot + COM-B -->
+      <section class="panel">
+        <h2>Snapshot</h2>
+        <div class="body">
+          <div class="kpi">
+            <div class="card">
+              <div class="num">Wicked</div>
+              <div class="lbl">Multi-stakeholder, multi-system problem</div>
+            </div>
+            <div class="card">
+              <div class="num">COM-B</div>
+              <div class="lbl">Capability · Opportunity · Motivation</div>
+            </div>
+            <div class="card">
+              <div class="num">Trust</div>
+              <div class="lbl">Central recruitment lever</div>
+            </div>
+            <div class="card">
+              <div class="num">AI + Platforms</div>
+              <div class="lbl">Scale + precision of recruitment</div>
+            </div>
+          </div>
+
+          <div class="note">
+            Tip: Use filters to focus (Behavioural / Technology / Systems / Prevention). Search works across all sections.
+          </div>
+
+          <div class="comb" aria-label="COM-B">
+            <div class="row open" data-tags="behavioural">
+              <div class="head" tabindex="0">
+                <strong>COM-B: Capability</strong>
+                <span class="pill">behavioural</span>
+              </div>
+              <div class="content">
+                <ul>
+                  <li>Victims often had basic digital literacy for online work.</li>
+                  <li>Recruitment simulated legitimacy (interviews, HR, tests).</li>
+                  <li>Many lacked ability to detect deception in complex digital recruitment environments.</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="row" data-tags="behavioural">
+              <div class="head" tabindex="0">
+                <strong>COM-B: Motivation</strong>
+                <span class="pill">behavioural</span>
+              </div>
+              <div class="content">
+                <ul>
+                  <li>Strong financial pressure (debts, unemployment, post-COVID precarity).</li>
+                  <li>Promised salary was highly persuasive (68% ranked it critical).</li>
+                  <li>Emotional drivers: escape stagnation, family responsibility, recruiter-created urgency.</li>
+                  <li>Trust significantly lowered perceived risk.</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="row" data-tags="behavioural systems technology">
+              <div class="head" tabindex="0">
+                <strong>COM-B: Opportunity</strong>
+                <span class="pill">behavioural · systems</span>
+              </div>
+              <div class="content">
+                <ul>
+                  <li>Structural migration precarity: informal recruitment, weak regulation, low oversight of digital job platforms.</li>
+                  <li>Social networks enabled recruitment: ~74% via trusted individuals or referrals.</li>
+                  <li>Platforms amplify recruiter reach and credibility.</li>
+                </ul>
+                <div class="insight">
+                  <strong>Key behavioural insight:</strong> people were not acting irrationally — they made decisions that looked reasonable within constrained economic and informational contexts.
+                </div>
+              </div>
+            </div>
+
+            <div class="stack" aria-label="Four-level prevention stack">
+              <div class="layer">
+                <div class="dot beh"></div>
+                <div>
+                  <strong>1) Individual behavioural level</strong><br/>
+                  <span>Decision-making under constraint</span>
+                </div>
+              </div>
+              <div class="layer">
+                <div class="dot"></div>
+                <div>
+                  <strong>2) Social trust network level</strong><br/>
+                  <span>Social proof + referrals</span>
+                </div>
+              </div>
+              <div class="layer">
+                <div class="dot sys"></div>
+                <div>
+                  <strong>3) Digital platform governance</strong><br/>
+                  <span>Recruitment architecture + moderation</span>
+                </div>
+              </div>
+              <div class="layer">
+                <div class="dot key"></div>
+                <div>
+                  <strong>4) Structural migration & corruption</strong><br/>
+                  <span>Governance, labour, impunity</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- RIGHT: Sections -->
+      <main class="panel">
+        <h2>Sections</h2>
+
+        <div class="cards" id="cards">
+
+          <!-- 1 -->
+          <article class="cardx" data-tags="systems behavioural">
+            <header>
+              <div>
+                <h3>1. Why This Is a “Wicked Problem”</h3>
+              </div>
+              <div class="tags">
+                <span class="tag sys">systems</span>
+                <span class="tag beh">behavioural</span>
+              </div>
+            </header>
+            <div class="content">
+              <ul>
+                <li>Cyber scam operations are embedded in complex socio-economic, political, and digital ecosystems.</li>
+                <li>Traditional law enforcement responses have not disrupted recruitment dynamics.</li>
+                <li>Reframed through behavioural science (why people decide to migrate) + systems analysis (how structures shape and constrain decisions).</li>
+                <li>Prevention requires understanding decision-making under vulnerability, not just criminal networks.</li>
+              </ul>
+            </div>
+            <details>
+              <summary>What this changes</summary>
+              <ul>
+                <li>“More raids” alone won’t solve recruitment; the system adapts and replenishes labour.</li>
+                <li>Prevention needs levers across behaviour, platforms, and governance structures.</li>
+              </ul>
+            </details>
+          </article>
+
+          <!-- 2 -->
+          <article class="cardx" data-tags="behavioural">
+            <header>
+              <div>
+                <h3>2. Behavioural Science Lens (COM-B Model)</h3>
+              </div>
+              <div class="tags">
+                <span class="tag beh">behavioural</span>
+              </div>
+            </header>
+            <div class="content">
+              <p style="margin:0;color:var(--muted)">
+                COM-B explains recruitment as a behaviour produced by Capability, Opportunity, and Motivation.
+              </p>
+            </div>
+            <details open>
+              <summary>View COM-B breakdown</summary>
+              <div style="margin-top:10px">
+                <strong>Capability</strong>
+                <ul>
+                  <li>Basic digital literacy enabled participation in “online work”.</li>
+                  <li>Legitimacy cues: interviews, HR departments, tests.</li>
+                  <li>Low detection capability in complex digital recruitment settings.</li>
+                </ul>
+                <strong>Motivation</strong>
+                <ul>
+                  <li>Financial pressure (debts, unemployment, post-COVID precarity).</li>
+                  <li>Promised salary as dominant persuasion (68% critical).</li>
+                  <li>Emotions: escape stagnation, family duty, urgency pressure.</li>
+                  <li>Trust lowered risk perception.</li>
+                </ul>
+                <strong>Opportunity</strong>
+                <ul>
+                  <li>Informal recruitment systems + weak labour regulation + low platform oversight.</li>
+                  <li>~74% recruited via trusted individuals/referrals.</li>
+                  <li>Platforms amplify credibility and reach.</li>
+                </ul>
+                <div class="insight">
+                  <strong>Key insight:</strong> decisions looked rational within constrained contexts (economic pressure + information asymmetry).
+                </div>
+              </div>
+            </details>
+          </article>
+
+          <!-- 3 -->
+          <article class="cardx" data-tags="behavioural prevention">
+            <header>
+              <div>
+                <h3>3. The Role of Trust in Recruitment</h3>
+              </div>
+              <div class="tags">
+                <span class="tag beh">behavioural</span>
+                <span class="tag key">key lever</span>
+                <span class="tag sys">prevention</span>
+              </div>
+            </header>
+            <div class="content">
+              <ul>
+                <li><strong>Trust</strong> is the central behavioural lever.</li>
+                <li>Recruiters are often friends, family, co-workers, community members; some are victims themselves.</li>
+                <li>Group migration increases perceived safety.</li>
+                <li>Professionalized recruitment processes boost perceived legitimacy.</li>
+              </ul>
+            </div>
+            <details>
+              <summary>Implication for prevention</summary>
+              <ul>
+                <li>Interventions must target <strong>social proof</strong> and <strong>trust networks</strong>, not just generic awareness campaigns.</li>
+              </ul>
+            </details>
+          </article>
+
+          <!-- 4 -->
+          <article class="cardx" data-tags="technology">
+            <header>
+              <div>
+                <h3>4. Technology as an Enabler of Trafficking</h3>
+              </div>
+              <div class="tags">
+                <span class="tag tech">technology</span>
+              </div>
+            </header>
+            <div class="content">
+              <p style="margin:0 0 8px 0;color:var(--muted)">
+                Digital tech is structural to the scam business model, not peripheral.
+              </p>
+              <strong>A. Digital infrastructure</strong>
+              <ul>
+                <li>Large-scale ICT infrastructure across compounds.</li>
+                <li>AI scripts, deepfakes, multilingual content, automated targeting, crypto laundering systems.</li>
+              </ul>
+              <strong>B. AI in recruitment</strong>
+              <ul>
+                <li>Scrape social media for financial vulnerability signals.</li>
+                <li>Identify employment distress; remove language barriers; scale deception.</li>
+              </ul>
+            </div>
+            <details>
+              <summary>Why AI matters</summary>
+              <ul>
+                <li>Increases precision of targeting, speed of recruitment, and cross-border reach.</li>
+              </ul>
+            </details>
+          </article>
+
+          <!-- 5 -->
+          <article class="cardx" data-tags="technology systems">
+            <header>
+              <div>
+                <h3>5. Social Media as Recruitment Architecture</h3>
+              </div>
+              <div class="tags">
+                <span class="tag tech">technology</span>
+                <span class="tag sys">systems</span>
+              </div>
+            </header>
+            <div class="content">
+              <strong>Primary channels</strong>
+              <ul>
+                <li>Facebook (most common), TikTok, Instagram, YouTube</li>
+                <li>Telegram, WhatsApp, Signal, LINE (encrypted migration)</li>
+              </ul>
+              <strong>Dynamics</strong>
+              <ul>
+                <li>Job ads in “legit” employment groups.</li>
+                <li>Rapid shift to encrypted messaging.</li>
+                <li>Fake HR processes simulate formal employment.</li>
+              </ul>
+              <strong>Moderation gaps</strong>
+              <ul>
+                <li>Counter-trafficking accounts sometimes removed.</li>
+                <li>Recruiters persist via algorithmic blind spots.</li>
+                <li>Limited local-language moderation capacity.</li>
+              </ul>
+              <div class="insight">
+                <strong>Technology insight:</strong> digital governance gaps create asymmetric advantage for traffickers.
+              </div>
+            </div>
+          </article>
+
+          <!-- 6 -->
+          <article class="cardx" data-tags="systems">
+            <header>
+              <div>
+                <h3>6. System-Level Enablers</h3>
+              </div>
+              <div class="tags">
+                <span class="tag sys">systems</span>
+              </div>
+            </header>
+            <div class="content">
+              <ul>
+                <li>Migration governance opacity</li>
+                <li>Weak labour inspection systems</li>
+                <li>Corruption and official collusion</li>
+                <li>Impunity</li>
+                <li>Weak digital regulatory regimes</li>
+                <li>Limited protection post-release</li>
+              </ul>
+              <div class="insight">
+                Without structural reform, behavioural interventions alone will fail.
+              </div>
+            </div>
+          </article>
+
+          <!-- 7 -->
+          <article class="cardx" data-tags="prevention behavioural systems technology">
+            <header>
+              <div>
+                <h3>7. Prevention Through Behavioural + Systems Integration</h3>
+              </div>
+              <div class="tags">
+                <span class="tag beh">behavioural</span>
+                <span class="tag sys">systems</span>
+                <span class="tag tech">technology</span>
+                <span class="tag key">prevention</span>
+              </div>
+            </header>
+            <div class="content">
+              <strong>Behavioural interventions</strong>
+              <ul>
+                <li>Design counter-messaging based on real decision drivers.</li>
+                <li>Address trust-based pathways.</li>
+                <li>Disrupt urgency manipulation tactics.</li>
+                <li>Improve early detection of digital recruitment patterns.</li>
+              </ul>
+              <strong>Systems interventions</strong>
+              <ul>
+                <li>Regulate digital recruitment platforms.</li>
+                <li>Enforce human rights due diligence for tech companies.</li>
+                <li>Strengthen labour migration governance.</li>
+                <li>Implement non-punishment principles for victims forced into criminality.</li>
+                <li>Target corruption networks.</li>
+              </ul>
+            </div>
+          </article>
+
+          <!-- 8 -->
+          <article class="cardx" data-tags="key prevention">
+            <header>
+              <div>
+                <h3>8. Core Strategic Insight</h3>
+              </div>
+              <div class="tags">
+                <span class="tag key">key insight</span>
+                <span class="tag sys">prevention</span>
+              </div>
+            </header>
+            <div class="content">
+              <p style="margin:0 0 10px 0">
+                The persistence of recruitment is not due to ignorance.
+              </p>
+              <ul>
+                <li>Driven by rational decisions under constraint</li>
+                <li>Amplified by digital technology</li>
+                <li>Embedded in fragile governance systems</li>
+              </ul>
+              <strong>Operate simultaneously at</strong>
+              <ol style="margin:8px 0 0 18px">
+                <li>Individual behavioural level</li>
+                <li>Social trust network level</li>
+                <li>Digital platform governance level</li>
+                <li>Structural migration and corruption level</li>
+              </ol>
+            </div>
+          </article>
+
+        </div>
+      </main>
+    </div>
+
+    <footer>
+      Built as a single self-contained HTML file (no external libraries). Use search + filters to focus on behavioural science and technology components.
+    </footer>
+  </div>
+
+  <script>
+    const q = document.getElementById('q');
+    const chips = Array.from(document.querySelectorAll('.chip'));
+    const cards = Array.from(document.querySelectorAll('.cardx'));
+    const combRows = Array.from(document.querySelectorAll('.comb .row'));
+    const countEl = document.getElementById('count');
+    let activeFilter = 'all';
+
+    function norm(s){ return (s||'').toLowerCase().trim(); }
+
+    function matchesFilter(el){
+      if(activeFilter === 'all') return true;
+      const tags = norm(el.getAttribute('data-tags'));
+      return tags.includes(activeFilter);
+    }
+
+    function matchesQuery(el){
+      const query = norm(q.value);
+      if(!query) return true;
+      const hay = norm(el.innerText);
+      return hay.includes(query);
+    }
+
+    function apply(){
+      let shown = 0;
+
+      // cards
+      cards.forEach(c=>{
+        const ok = matchesFilter(c) && matchesQuery(c);
+        c.classList.toggle('hidden', !ok);
+        if(ok) shown++;
+      });
+
+      // COM-B rows follow the same filter/query logic
+      combRows.forEach(r=>{
+        const ok = matchesFilter(r) && matchesQuery(r);
+        r.classList.toggle('hidden', !ok);
+      });
+
+      countEl.textContent = `${shown} / ${cards.length} sections shown`;
+    }
+
+    chips.forEach(ch=>{
+      ch.addEventListener('click', ()=>{
+        chips.forEach(x=>x.classList.remove('active'));
+        ch.classList.add('active');
+        activeFilter = ch.dataset.filter;
+        apply();
+      });
+    });
+
+    q.addEventListener('input', apply);
+
+    // COM-B accordion toggles
+    document.querySelectorAll('.comb .head').forEach(h=>{
+      const row = h.parentElement;
+      h.addEventListener('click', ()=> row.classList.toggle('open'));
+      h.addEventListener('keydown', (e)=>{
+        if(e.key === 'Enter' || e.key === ' '){
+          e.preventDefault();
+          row.classList.toggle('open');
+        }
+      });
+    });
+
+    // Expand/collapse details
+    const expandAll = document.getElementById('expandAll');
+    const collapseAll = document.getElementById('collapseAll');
+    expandAll.addEventListener('click', ()=>{
+      document.querySelectorAll('details').forEach(d=> d.open = true);
+      combRows.forEach(r=> r.classList.add('open'));
+    });
+    collapseAll.addEventListener('click', ()=>{
+      document.querySelectorAll('details').forEach(d=> d.open = false);
+      combRows.forEach(r=> r.classList.remove('open'));
+    });
+
+    apply();
+  </script>
+</body>
+</html>
